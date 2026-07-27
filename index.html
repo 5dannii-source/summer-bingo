@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>여름방학 미션 빙고 🌻</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF8E7;
+    --sun:#FFC93C;
+    --sun-dark:#F2A93C;
+    --sky:#4FB0C6;
+    --sky-dark:#2E8FA6;
+    --coral:#FF6F59;
+    --leaf:#6FB86F;
+    --ink:#2B3A55;
+    --card:#FFFFFF;
+    --lock:#B8B0A0;
+    --shadow: 0 4px 0 rgba(43,58,85,0.12);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 90% -5%, rgba(255,201,60,0.35), transparent 40%),
+      radial-gradient(circle at 5% 105%, rgba(79,176,198,0.25), transparent 40%),
+      var(--bg);
+    font-family:'Gowun Dodum', sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  h1,h2,h3,.heading{font-family:'Jua', sans-serif; font-weight:400; letter-spacing:0.5px;}
+  #app{max-width:900px; margin:0 auto; padding:20px 16px 80px;}
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; background:var(--card); border-radius:20px;
+    box-shadow:var(--shadow); margin-bottom:24px; flex-wrap:wrap; gap:10px;
+  }
+  .topbar .title{display:flex; align-items:center; gap:10px;}
+  .topbar h1{margin:0; font-size:1.4rem; color:var(--ink);}
+  .sun-icon{font-size:1.8rem;}
+  button{
+    font-family:'Gowun Dodum', sans-serif;
+    cursor:pointer; border:none; border-radius:14px;
+    padding:10px 16px; font-size:0.95rem; font-weight:600;
+    transition:transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  button:active{transform:translateY(2px);}
+  .btn-primary{background:var(--coral); color:#fff; box-shadow:0 3px 0 #C74E3F;}
+  .btn-primary:active{box-shadow:0 1px 0 #C74E3F;}
+  .btn-sky{background:var(--sky); color:#fff; box-shadow:0 3px 0 var(--sky-dark);}
+  .btn-sky:active{box-shadow:0 1px 0 var(--sky-dark);}
+  .btn-sun{background:var(--sun); color:var(--ink); box-shadow:0 3px 0 var(--sun-dark);}
+  .btn-sun:active{box-shadow:0 1px 0 var(--sun-dark);}
+  .btn-ghost{background:transparent; color:var(--ink); box-shadow:none; text-decoration:underline; padding:6px 8px;}
+  .btn-danger{background:#fff; color:#D9534F; border:2px solid #D9534F; box-shadow:none;}
+  .btn-leaf{background:var(--leaf); color:#fff; box-shadow:0 3px 0 #4E9350;}
+
+  .card{background:var(--card); border-radius:20px; padding:20px; box-shadow:var(--shadow); margin-bottom:18px;}
+  .student-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:14px;}
+  .student-card{
+    background:var(--card); border-radius:18px; padding:16px 12px; text-align:center;
+    box-shadow:var(--shadow); cursor:pointer; position:relative; overflow:hidden;
+  }
+  .student-card:hover{transform:translateY(-2px);}
+  .student-card .avatar{font-size:2.2rem;}
+  .student-card .name{font-family:'Jua'; font-size:1.05rem; margin:6px 0 8px;}
+  .progress-ring{position:relative; width:56px; height:56px; margin:0 auto 6px;}
+  .progress-ring svg{transform:rotate(-90deg);}
+  .progress-ring .pct{
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.75rem; font-weight:700;
+  }
+  .empty-msg{text-align:center; padding:40px 20px; color:#8b8474;}
+
+  .bingo-header{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:14px;}
+  .encourage-banner{
+    background:linear-gradient(135deg, var(--sun), #FFE29A);
+    border-radius:16px; padding:14px 18px; margin-bottom:16px;
+    font-family:'Jua'; font-size:1.05rem; text-align:center; color:#5c4200;
+  }
+  .bingo-banner{
+    background:linear-gradient(135deg, var(--coral), #FF9C8D);
+    color:#fff; border-radius:16px; padding:12px 18px; margin-bottom:16px;
+    font-family:'Jua'; text-align:center; font-size:1.05rem;
+  }
+  .bingo-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:8px;}
+  .bingo-cell{
+    aspect-ratio:1/1; border-radius:14px; background:#fff;
+    border:2px solid #F0E6CE; padding:6px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; cursor:pointer;
+    font-size:0.68rem; line-height:1.15; position:relative; overflow:hidden;
+  }
+  .bingo-cell:hover{border-color:var(--sky);}
+  .bingo-cell.done{background:linear-gradient(135deg,#EAF7EA,#fff); border-color:var(--leaf);}
+  .bingo-cell .num{position:absolute; top:3px; left:5px; font-size:0.6rem; color:#B0A98F; font-weight:700;}
+  .bingo-cell .icon{font-size:1.3rem; margin-bottom:2px;}
+  .bingo-cell .lockbadge{position:absolute; top:3px; right:5px; font-size:0.7rem;}
+  .bingo-cell .txt{padding:0 2px;}
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(43,58,85,0.45);
+    display:flex; align-items:center; justify-content:center; z-index:50; padding:16px;
+  }
+  .modal-box{
+    background:var(--bg); border-radius:22px; max-width:520px; width:100%;
+    max-height:88vh; overflow-y:auto; padding:22px; box-shadow:0 10px 0 rgba(0,0,0,0.1);
+  }
+  .modal-box h2{margin-top:0;}
+  textarea, input[type=text], input[type=password]{
+    width:100%; padding:10px 12px; border-radius:12px; border:2px solid #E9E0C8;
+    font-family:'Gowun Dodum'; font-size:0.95rem; margin:6px 0 12px; background:#fff;
+  }
+  label.field-label{font-size:0.85rem; font-weight:700; color:#7a7260; display:block; margin-top:8px;}
+  .radio-row{display:flex; gap:14px; margin:8px 0 14px;}
+  .radio-row label{display:flex; align-items:center; gap:5px; font-size:0.9rem; cursor:pointer;}
+  .post-content img{max-width:100%; border-radius:14px; margin:10px 0;}
+  .post-content .text-post{background:#fff; border-radius:14px; padding:14px; white-space:pre-wrap; margin:10px 0; border:1px solid #EEE4CB;}
+  .locked-notice{background:#F1EEE4; border-radius:14px; padding:20px; text-align:center; color:#8b8474; margin:10px 0;}
+  .meta-row{font-size:0.78rem; color:#a39c88; margin-top:2px;}
+  .divider{border:none; border-top:2px dashed #E9E0C8; margin:16px 0;}
+  .comment{background:#fff; border-radius:12px; padding:8px 12px; margin-bottom:8px; font-size:0.88rem;}
+  .comment b{color:var(--sky-dark);}
+  .reaction-row{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;}
+  .reaction-btn{background:#fff; border:2px solid #EEE4CB; border-radius:20px; padding:5px 10px; font-size:0.95rem;}
+  .reaction-btn.active{border-color:var(--coral); background:#FFF0EE;}
+  .close-x{position:absolute; top:14px; right:18px; font-size:1.3rem; background:none; color:var(--ink); box-shadow:none; padding:2px 6px;}
+  .rel{position:relative;}
+  .small-note{font-size:0.8rem; color:#a39c88; margin-top:-4px; margin-bottom:10px;}
+  table.admin-table{width:100%; border-collapse:collapse; font-size:0.9rem;}
+  table.admin-table th, table.admin-table td{padding:8px; border-bottom:1px solid #EEE4CB; text-align:left;}
+  .tabs{display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;}
+  .tab-btn{background:#fff; color:var(--ink); box-shadow:none; border:2px solid #EEE4CB;}
+  .tab-btn.active{background:var(--sky); color:#fff; border-color:var(--sky-dark);}
+  .mission-edit-row{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+  .mission-edit-row span{width:26px; font-weight:700; color:#a39c88; flex-shrink:0;}
+  .file-drop{border:2px dashed #E9E0C8; border-radius:14px; padding:16px; text-align:center; background:#fffef8;}
+  .flex-between{display:flex; justify-content:space-between; align-items:center;}
+  .badge{display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:700;}
+  .badge-public{background:#E4F5E4; color:#3E7D3E;}
+  .badge-teacher{background:#F1EEE4; color:#7a7260;}
+  .save-indicator{position:fixed; bottom:14px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:8px 18px; border-radius:20px; font-size:0.85rem; z-index:100; opacity:0.9;}
+  ::placeholder{color:#c9c2ae;}
+</style>
+</head>
+<body>
+<div id="app"><div class="empty-msg">불러오는 중... 🌞</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* jsDelivr 가 막힌 망(학교/사내)에서는 다른 CDN 으로 한 번 더 시도 */
+if(!window.supabase){
+  document.write('<scr'+'ipt src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"><\/scr'+'ipt>');
+}
+</script>
+<script>
+/* ===================== 상태 ===================== */
+const state = {
+  view:'home', studentId:null, missionIdx:null,
+  isAdmin:false, authedStudent:{}, pwCache:{}, reactorName:null,
+  studentsCache:null, missionsCache:null,
+};
+
+const MISSIONS_DEFAULT = [
+ "책 3권 읽고 독서 기록장 쓰기","가족과 함께 저녁 요리 만들기","하루 30분씩 3일 운동하기",
+ "박물관이나 도서관 다녀오기","소중한 사람에게 손 편지 쓰기","여름 일기 3일 쓰기",
+ "내 방 청소하고 정리정돈하기","새로운 요리나 간식 만들어보기","자전거나 줄넘기로 신나게 놀기",
+ "식물이나 곤충 관찰하고 그림 그리기","하루 동안 스마트폰 없이 지내보기","밤하늘 별자리 관찰하기",
+ "봉사활동 참여하기 (분리수거, 심부름 등)","나만의 여름 버킷리스트 만들기","물놀이나 수영하기",
+ "영어 단어 10개 외우기","그림일기나 만화로 하루 표현하기","집안일 돕기 (설거지, 빨래 개기 등)",
+ "좋아하는 책 속 인물에게 편지 쓰기","가족과 보드게임이나 카드게임 하기","아침 일찍 일어나 산책하기",
+ "나의 장래희망 조사하고 소개 자료 만들기","종이접기나 만들기 작품 완성하기","감사한 일 5가지 적어보기",
+ "방학 동안 배운 점 정리해서 발표하기"
+];
+
+const STUDENTS_SEED = [
+ "나영서","노연서","박지엘","선다은","양유진","유준선","윤이아","이동학","이수빈",
+ "이승찬","이찬혁","임가인","임준수","최지욱","한유찬","한형준","황서연"
+];
+
+function esc(s){
+  if(s===undefined||s===null) return '';
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escAttr(s){ return esc(s).replace(/`/g,'&#96;'); }
+function delay(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+/* ===================== Supabase 연결 & 저장소 헬퍼 (재시도 포함) ===================== */
+const SUPABASE_URL = 'https://xyekwijjrsfrtcrckivo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_k_zMjpNCOscpx3zmboF4GA_HwhHYO36';
+const KV_TABLE = 'bingo_kv';
+
+let sb = null, sbInitError = null;
+try{
+  if(!window.supabase || !window.supabase.createClient){
+    throw new Error('supabase-js 라이브러리를 불러오지 못했습니다 (CDN 차단 가능성)');
+  }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}catch(e){ sbInitError = e; console.error('supabase init error', e); }
+
+/* --- 오류를 사람이 읽을 수 있게 풀어주는 진단기 --- */
+function rawErrText(e){
+  if(!e) return '(오류 객체 없음)';
+  const p = [];
+  if(e.code) p.push('code=' + e.code);
+  if(e.status) p.push('status=' + e.status);
+  if(e.message) p.push(e.message);
+  if(e.details) p.push('details=' + e.details);
+  if(e.hint) p.push('hint=' + e.hint);
+  return p.length ? p.join(' | ') : String(e);
+}
+function diagnose(e){
+  if(sbInitError) return 'supabase-js 라이브러리 자체가 로드되지 않았어요. 인터넷 차단, 광고차단 확장, 또는 미리보기 샌드박스에서 외부 스크립트가 막힌 경우예요.';
+  const msg = ((e && e.message) || '') + ' ' + ((e && e.details) || '');
+  const m = msg.toLowerCase();
+  const code = e && e.code;
+  const status = e && e.status;
+  if(m.includes('failed to fetch') || m.includes('networkerror') || m.includes('load failed') || m.includes('typeerror: fetch'))
+    return '브라우저가 Supabase 서버에 연결조차 하지 못했어요.\n① 이 파일을 Claude 미리보기 창이 아니라 진짜 브라우저(또는 웹에 올린 주소)에서 열어보세요\n② 학교/사내 방화벽·광고차단 확장 확인\n③ Supabase 프로젝트가 일시정지(pause) 상태인지 확인';
+  if(status === 401 || status === 403 || m.includes('invalid api key') || m.includes('no api key'))
+    return 'API 키가 거부됐어요. Supabase 대시보드 → Project Settings → API Keys 에서 현재 유효한 publishable(또는 anon) 키를 다시 복사해 코드 상단 SUPABASE_KEY 에 넣어주세요.';
+  if(code === '42P01' || (m.includes('relation') && m.includes('does not exist')) || status === 404)
+    return "'" + KV_TABLE + "' 테이블이 없어요(또는 이름이 달라요). 아래 SQL을 Supabase SQL Editor에서 실행하세요.";
+  if(code === '42P10' || m.includes('on conflict'))
+    return "'key' 열에 기본키/UNIQUE 제약이 없어서 upsert가 실패해요. 아래 SQL을 실행하세요.";
+  if(code === 'PGRST204' || code === '42703' || m.includes('column'))
+    return '테이블 열 구성이 앱과 달라요 (key / value / updated_at). 아래 SQL을 실행하세요.';
+  if(code === '42501' || m.includes('row-level security') || m.includes('violates row-level'))
+    return 'RLS(행 보안) 정책 때문에 쓰기가 차단됐어요. anon 역할에 select/insert/update/delete 정책이 필요해요. 아래 SQL을 실행하세요.';
+  if(code === '22P02' || m.includes('invalid input syntax'))
+    return "value 열 타입이 jsonb가 아닐 수 있어요(text 등). 아래 SQL대로 jsonb 로 맞춰주세요.";
+  return '원인이 자동으로 특정되지 않았어요. 아래 원본 오류 메시지를 확인해주세요.';
+}
+const FIX_SQL = `create table if not exists public.bingo_kv (
+  key        text primary key,
+  value      jsonb,
+  updated_at timestamptz default now()
+);
+alter table public.bingo_kv enable row level security;
+drop policy if exists bingo_kv_all on public.bingo_kv;
+create policy bingo_kv_all on public.bingo_kv
+  for all to anon, authenticated
+  using (true) with check (true);`;
+
+async function withRetry(fn, retries=2, delayMs=400){
+  let lastErr;
+  for(let i=0;i<=retries;i++){
+    try{ return await fn(); }
+    catch(e){
+      lastErr = e;
+      // 설정/권한 오류는 재시도해도 소용없으므로 즉시 중단
+      const c = e && e.code;
+      if(c==='42P01'||c==='42P10'||c==='42501'||c==='PGRST204'||c==='42703'||e.status===401||e.status===403) break;
+      if(i<retries) await delay(delayMs*(i+1));
+    }
+  }
+  throw lastErr;
+}
+
+/* 오류를 던지는 원본 호출 (supabase-js 는 throw 대신 {error} 를 돌려주므로 직접 throw) */
+async function q(builder){
+  const { data, error } = await builder;
+  if(error) throw error;
+  return data;
+}
+
+let HAS_UPDATED_AT = true;
+async function rawUpsert(key, value){
+  const row = HAS_UPDATED_AT
+    ? { key, value, updated_at: new Date().toISOString() }
+    : { key, value };
+  return await q(sb.from(KV_TABLE).upsert(row, { onConflict: 'key' }));
+}
+
+let lastStorageError = null;
+async function reportStorageError(op, key, e){
+  lastStorageError = e;
+  console.error('storage ' + op + ' error', key, e);
+  await customAlert(
+    '❗ ' + op + '에 실패했어요.\n\n[원인 추정]\n' + diagnose(e) +
+    '\n\n[원본 오류]\n' + rawErrText(e)
+  );
+}
+
+/* 읽기: 실패를 숨기지 않고 던진다 (숨기면 "데이터 없음"으로 오인해 덮어쓸 위험) */
+async function getValStrict(key){
+  if(!sb) throw sbInitError;
+  const data = await withRetry(()=> q(sb.from(KV_TABLE).select('value').eq('key', key).maybeSingle()));
+  return data ? data.value : null;
+}
+async function getVal(key){
+  try{ return await getValStrict(key); }
+  catch(e){ console.error('storage get error', key, e); lastStorageError = e; return null; }
+}
+async function setVal(key, value){
+  if(!sb){ await reportStorageError('저장', key, sbInitError); return false; }
+  try{
+    try{
+      await withRetry(()=> rawUpsert(key, value));
+    }catch(e){
+      // updated_at 열이 없는 테이블이면 그 열을 빼고 한 번 더 시도
+      const noCol = (e && (e.code==='PGRST204' || e.code==='42703')) || /updated_at/i.test((e && e.message) || '');
+      if(HAS_UPDATED_AT && noCol){
+        HAS_UPDATED_AT = false;
+        await withRetry(()=> rawUpsert(key, value));
+      } else throw e;
+    }
+    return true;
+  }catch(e){
+    await reportStorageError('저장', key, e);
+    return false;
+  }
+}
+async function delVal(key){
+  if(!sb) return;
+  try{ await withRetry(()=> q(sb.from(KV_TABLE).delete().eq('key', key))); }
+  catch(e){ console.error('storage del error', key, e); }
+}
+async function listKeys(prefix){
+  try{
+    const data = await withRetry(()=> q(sb.from(KV_TABLE).select('key').like('key', prefix + '%')));
+    return (data||[]).map(r=>r.key);
+  }catch(e){ console.error('storage list error', prefix, e); return []; }
+}
+
+/* 연결 자가진단: 읽기 1회 + 쓰기 1회를 실제로 해본다 */
+async function selfTest(){
+  if(!sb) return { ok:false, step:'라이브러리 로드', error:sbInitError };
+  try{ await getValStrict('__conn_test'); }
+  catch(e){ return { ok:false, step:'읽기(select)', error:e }; }
+  try{
+    try{ await rawUpsert('__conn_test', { at:new Date().toISOString() }); }
+    catch(e){
+      const noCol = (e && (e.code==='PGRST204' || e.code==='42703')) || /updated_at/i.test((e&&e.message)||'');
+      if(HAS_UPDATED_AT && noCol){ HAS_UPDATED_AT = false; await rawUpsert('__conn_test', { at:new Date().toISOString() }); }
+      else throw e;
+    }
+  }catch(e){ return { ok:false, step:'쓰기(upsert)', error:e }; }
+  return { ok:true };
+}
+
+function hashStr(str){
+  let hash = 5381;
+  for(let i=0;i<str.length;i++){ hash = ((hash<<5)+hash) + str.charCodeAt(i); hash = hash & hash; }
+  return String(hash>>>0);
+}
+function hashPw(pw, salt){ return hashStr(salt+'::'+pw+'::'+salt.length); }
+
+/* ===================== 학생별 데이터 (게시글+댓글+반응+비밀번호를 하나의 키로 통합) ===================== */
+function studentDataKey(sid){ return 'data_'+sid; }
+function emptyStudentData(){ return {authHash:null, posts:{}, comments:{}, reactions:{}}; }
+async function getStudentData(sid){
+  const d = await getVal(studentDataKey(sid));
+  if(!d) return emptyStudentData();
+  d.posts = d.posts || {}; d.comments = d.comments || {}; d.reactions = d.reactions || {};
+  return d;
+}
+async function saveStudentData(sid, data){ return await setVal(studentDataKey(sid), data); }
+
+/* ===================== 커스텀 알림/확인/입력 모달 (샌드박스에서 기본 alert/confirm/prompt가 막혀 있어 직접 구현) ===================== */
+function closeUiModal(){ const el = document.getElementById('uiModalOverlay'); if(el) el.remove(); }
+function customAlert(msg){
+  return new Promise(resolve=>{
+    closeUiModal();
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay'; overlay.id = 'uiModalOverlay';
+    overlay.innerHTML = `<div class="modal-box" style="max-width:360px;">
+      <p style="font-size:1rem; margin-top:0;">${esc(msg)}</p>
+      <div style="text-align:right;"><button class="btn-primary" id="uiOkBtn">확인</button></div>
+    </div>`;
+    document.body.appendChild(overlay);
+    const finish = ()=>{ overlay.remove(); resolve(); };
+    document.getElementById('uiOkBtn').onclick = finish;
+    overlay.onclick = (e)=>{ if(e.target===overlay) finish(); };
+  });
+}
+function customConfirm(msg){
+  return new Promise(resolve=>{
+    closeUiModal();
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay'; overlay.id = 'uiModalOverlay';
+    overlay.innerHTML = `<div class="modal-box" style="max-width:380px;">
+      <p style="font-size:1rem; margin-top:0;">${esc(msg)}</p>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn-ghost" id="uiCancelBtn">취소</button>
+        <button class="btn-primary" id="uiOkBtn">확인</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    const finish = (val)=>{ overlay.remove(); resolve(val); };
+    document.getElementById('uiOkBtn').onclick = ()=>finish(true);
+    document.getElementById('uiCancelBtn').onclick = ()=>finish(false);
+    overlay.onclick = (e)=>{ if(e.target===overlay) finish(false); };
+  });
+}
+function customPrompt(msg, defVal, isPassword){
+  return new Promise(resolve=>{
+    closeUiModal();
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay'; overlay.id = 'uiModalOverlay';
+    overlay.innerHTML = `<div class="modal-box" style="max-width:380px;">
+      <p style="font-size:1rem; margin-top:0;">${esc(msg)}</p>
+      <input type="${isPassword?'password':'text'}" id="uiPromptInput" value="${escAttr(defVal||'')}">
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn-ghost" id="uiCancelBtn">취소</button>
+        <button class="btn-primary" id="uiOkBtn">확인</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    const input = document.getElementById('uiPromptInput');
+    setTimeout(()=>{ input.focus(); input.select(); }, 30);
+    const finish = (val)=>{ overlay.remove(); resolve(val); };
+    document.getElementById('uiOkBtn').onclick = ()=>finish(input.value);
+    document.getElementById('uiCancelBtn').onclick = ()=>finish(null);
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') finish(input.value); });
+    overlay.onclick = (e)=>{ if(e.target===overlay) finish(null); };
+  });
+}
+
+/* ===================== 초기화 ===================== */
+function showFatal(step, e){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="card" style="max-width:640px; margin:0 auto;">
+      <h2 class="heading" style="margin-top:0;">🔌 서버(Supabase) 연결에 실패했어요</h2>
+      <p class="small-note">실패한 단계: <b>${esc(step)}</b></p>
+      <p style="white-space:pre-wrap; line-height:1.6;"><b>원인 추정</b>\n${esc(diagnose(e))}</p>
+      <p style="white-space:pre-wrap; background:#f6f6f6; padding:10px; border-radius:8px; font-size:.85rem; word-break:break-all;"><b>원본 오류</b>\n${esc(rawErrText(e))}</p>
+      <details style="margin:12px 0;">
+        <summary style="cursor:pointer;">테이블/권한 고치는 SQL 보기 (Supabase → SQL Editor 에 붙여넣기)</summary>
+        <pre style="white-space:pre-wrap; background:#f6f6f6; padding:10px; border-radius:8px; font-size:.8rem;">${esc(FIX_SQL)}</pre>
+      </details>
+      <button class="btn-primary" onclick="location.reload()">🔄 다시 시도</button>
+    </div>`;
+}
+
+async function init(){
+  const test = await selfTest();
+  if(!test.ok){ showFatal(test.step, test.error); return; }
+
+  let initialized, students, missions;
+  try{
+    initialized = await getValStrict('__initialized');
+    students    = await getValStrict('students');
+    missions    = await getValStrict('missions');
+  }catch(e){
+    showFatal('데이터 읽기', e);
+    return;
+  }
+  if(!initialized){
+    // 정말 처음 사용하는 경우에만 기본값을 만들어 저장
+    if(students===null) students = [];
+    if(missions===null) missions = MISSIONS_DEFAULT;
+    await setVal('students', students);
+    await setVal('missions', missions);
+    await setVal('__initialized', true);
+  } else {
+    // 이미 사용 중이던 사이트라면, 불러오기가 실패해도 절대 기존 데이터를 덮어쓰지 않는다
+    if(students===null){
+      students = [];
+      await customAlert('학생 목록을 불러오지 못했어요. 새로고침한 뒤 다시 시도해주세요. (기존 데이터는 안전해요)');
+    }
+    if(missions===null){
+      missions = MISSIONS_DEFAULT;
+      await customAlert('미션 목록을 불러오지 못했어요. 새로고침한 뒤 다시 시도해주세요. (기존 데이터는 안전해요)');
+    }
+  }
+  state.studentsCache = students;
+  state.missionsCache = missions;
+  render();
+}
+
+async function refreshStudents(){ state.studentsCache = (await getVal('students')) || []; }
+async function refreshMissions(){ state.missionsCache = (await getVal('missions')) || MISSIONS_DEFAULT; }
+
+/* ===================== 렌더 디스패치 ===================== */
+async function render(){
+  const app = document.getElementById('app');
+  if(state.view==='home') app.innerHTML = await renderHome();
+  else if(state.view==='student') app.innerHTML = await renderStudentPage(state.studentId);
+  else if(state.view==='teacher') app.innerHTML = await renderTeacher();
+  window.scrollTo(0,0);
+}
+
+/* ===================== 홈 화면 ===================== */
+async function renderHome(){
+  await refreshStudents();
+  const students = state.studentsCache;
+  let cards = '';
+  for(const s of students){
+    const data = await getStudentData(s.id);
+    const count = Object.keys(data.posts).length;
+    const pct = Math.round((count/25)*100);
+    const circ = 2*Math.PI*24;
+    const dash = circ*(pct/100);
+    cards += `
+      <div class="student-card" onclick="openStudent('${s.id}')">
+        <div class="progress-ring">
+          <svg width="56" height="56">
+            <circle cx="28" cy="28" r="24" stroke="#F0E6CE" stroke-width="6" fill="none"/>
+            <circle cx="28" cy="28" r="24" stroke="var(--leaf)" stroke-width="6" fill="none"
+              stroke-dasharray="${dash} ${circ}" stroke-linecap="round"/>
+          </svg>
+          <div class="pct">${count}/25</div>
+        </div>
+        <div class="avatar">🍉</div>
+        <div class="name">${esc(s.name)}</div>
+      </div>`;
+  }
+  return `
+    <div class="topbar">
+      <div class="title"><span class="sun-icon">🌻</span><h1>여름방학 미션 빙고</h1></div>
+      <button class="btn-sky" onclick="openTeacher()">👩‍🏫 선생님 모드</button>
+    </div>
+    <div class="card">
+      <h2 class="heading" style="margin-top:0;">누구의 빙고판을 볼까요?</h2>
+      ${students.length===0 ? `<div class="empty-msg">아직 등록된 학생이 없어요.<br>선생님 모드에서 학생을 추가해주세요! 🧑‍🏫</div>`
+        : `<div class="student-grid">${cards}</div>`}
+    </div>
+  `;
+}
+
+function openStudent(id){ state.studentId = id; state.view='student'; render(); }
+function openTeacher(){ state.view='teacher'; render(); }
+function goHome(){ state.view='home'; state.studentId=null; render(); }
+
+/* ===================== 학생 페이지 ===================== */
+function getEncouragement(count){
+  const msgs = {
+    0:["아직 시작 전이에요! 첫 미션에 도전해볼까요? 💪","여름방학이 기다리고 있어요! 첫 발을 내딛어봐요 🌱"],
+    low:["좋은 시작이에요! 하나씩 채워나가요 🌱","벌써 시작했네요! 이 기세로 쭉쭉 🚀"],
+    mid:["벌써 여러 개를 완료했네요! 정말 잘하고 있어요 👏","꾸준함이 대단해요! 계속 힘내봐요 🔥"],
+    high:["빙고까지 얼마 안 남았어요! 화이팅! ✨","거의 다 왔어요! 완주가 눈앞이에요 🏆"],
+    full:["축하합니다! 모든 미션을 완료했어요! 최고예요 🎉👑","대단해요! 알찬 여름방학을 보냈네요 🌟"]
+  };
+  let bucket;
+  if(count===0) bucket='0';
+  else if(count<=8) bucket='low';
+  else if(count<=16) bucket='mid';
+  else if(count<=24) bucket='high';
+  else bucket='full';
+  const arr = msgs[bucket];
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function countBingoLines(doneSet){
+  let lines = 0;
+  for(let r=0;r<5;r++){ let ok=true; for(let c=0;c<5;c++) if(!doneSet.has(r*5+c)) ok=false; if(ok) lines++; }
+  for(let c=0;c<5;c++){ let ok=true; for(let r=0;r<5;r++) if(!doneSet.has(r*5+c)) ok=false; if(ok) lines++; }
+  let d1=true; for(let i=0;i<5;i++) if(!doneSet.has(i*5+i)) d1=false; if(d1) lines++;
+  let d2=true; for(let i=0;i<5;i++) if(!doneSet.has(i*5+(4-i))) d2=false; if(d2) lines++;
+  return lines;
+}
+
+async function renderStudentPage(sid){
+  await refreshStudents(); await refreshMissions();
+  const student = state.studentsCache.find(s=>s.id===sid);
+  if(!student){ state.view='home'; return renderHome(); }
+  const missions = state.missionsCache;
+  const data = await getStudentData(sid);
+  const doneIdx = new Set(Object.keys(data.posts).map(Number));
+  const count = doneIdx.size;
+  const lines = countBingoLines(doneIdx);
+  const isMe = !!state.authedStudent[sid];
+
+  let cells = '';
+  for(let i=0;i<25;i++){
+    const done = doneIdx.has(i);
+    const post = data.posts[i];
+    const locked = done && post && post.visibility==='teacher';
+    cells += `<div class="bingo-cell ${done?'done':''}" onclick="openMission('${sid}',${i})">
+        <span class="num">${i+1}</span>
+        ${locked?'<span class="lockbadge">🔒</span>':''}
+        <span class="icon">${done?'✅':'⬜'}</span>
+        <span class="txt">${esc(missions[i]).slice(0,16)}${missions[i].length>16?'…':''}</span>
+      </div>`;
+  }
+
+  return `
+    <div class="topbar">
+      <div class="title"><button class="btn-ghost" onclick="goHome()">← 목록으로</button></div>
+      <div>${state.isAdmin?'<span class="badge badge-teacher">선생님 모드</span>':''}</div>
+    </div>
+    <div class="card">
+      <div class="bingo-header">
+        <div>
+          <h2 class="heading" style="margin:0;">🍉 ${esc(student.name)}의 여름방학 빙고</h2>
+          <div class="meta-row">완료 ${count} / 25 · 빙고 ${lines}줄 완성${isMe?' · <span style="color:var(--leaf);font-weight:700;">🔓 내 페이지로 확인됨</span>':''}</div>
+        </div>
+        ${!isMe? `<button class="btn-sun" onclick="promptAuth('${sid}')">🔑 내 페이지 인증하기</button>`:''}
+      </div>
+      <div class="encourage-banner">${getEncouragement(count)}</div>
+      ${lines>0?`<div class="bingo-banner">🎉 빙고 ${lines}줄 완성! 정말 대단해요!</div>`:''}
+      <div class="bingo-grid">${cells}</div>
+    </div>
+  `;
+}
+
+async function promptAuth(sid){
+  const data = await getStudentData(sid);
+  if(!data.authHash){
+    await customAlert('아직 이 친구는 비밀번호를 만들지 않았어요. 미션 칸을 눌러 첫 게시글을 쓸 때 비밀번호를 만들 수 있어요!');
+    return;
+  }
+  const pw = await customPrompt('내 페이지가 맞다면, 비밀번호를 입력해주세요 🔑', '', true);
+  if(pw===null) return;
+  if(hashPw(pw, sid)===data.authHash){
+    state.authedStudent[sid]=true; state.pwCache[sid]=pw;
+    await customAlert('인증되었어요! 이제 내 미션을 작성할 수 있어요 😊');
+    render();
+  } else {
+    await customAlert('비밀번호가 달라요. 다시 확인해주세요!');
+  }
+}
+
+/* ===================== 미션 상세 모달 ===================== */
+async function openMission(sid, idx){
+  state.studentId = sid; state.missionIdx = idx;
+  await renderMissionModal(sid, idx);
+}
+
+function closeMission(){
+  const el = document.getElementById('missionModalOverlay');
+  if(el) el.remove();
+  render();
+}
+
+async function renderMissionModal(sid, idx){
+  const oldOverlay = document.getElementById('missionModalOverlay');
+  if(oldOverlay) oldOverlay.remove();
+  await refreshMissions();
+  const missionText = state.missionsCache[idx];
+  const data = await getStudentData(sid);
+  const post = data.posts[idx];
+  const isOwnerOrAdmin = state.isAdmin || !!state.authedStudent[sid];
+  const canSeeContent = !post || post.visibility==='public' || isOwnerOrAdmin;
+
+  let contentHtml = '';
+  if(!post){
+    contentHtml = `<div class="locked-notice">아직 작성한 게시글이 없어요. 이 미션을 완료했다면 아래에서 인증해보세요! 📸</div>`;
+  } else if(!canSeeContent){
+    contentHtml = `<div class="locked-notice">🔒 이 게시글은 선생님과 작성자만 볼 수 있어요.</div>`;
+  } else {
+    contentHtml = `<div class="post-content">
+      ${post.type==='photo' && post.image ? `<img src="${post.image}" alt="인증 사진">` : ''}
+      ${post.text ? `<div class="text-post">${esc(post.text)}</div>` : ''}
+      <div class="meta-row">
+        <span class="badge ${post.visibility==='public'?'badge-public':'badge-teacher'}">${post.visibility==='public'?'전체공개':'선생님공개'}</span>
+        &nbsp;· 작성 ${new Date(post.ts).toLocaleString('ko-KR')}${post.editedTs?' (수정됨)':''}
+      </div>
+    </div>`;
+  }
+
+  let commentsHtml = '';
+  if(canSeeContent && post){
+    const comments = data.comments[idx] || [];
+    commentsHtml = `
+      <hr class="divider">
+      <div class="field-label">💬 댓글 ${comments.length}개</div>
+      <div id="commentList">
+        ${comments.map((c,ci)=>`<div class="comment"><b>${esc(c.author)}</b>: ${esc(c.text)}
+          ${state.isAdmin?`<button class="btn-ghost" style="float:right;color:#D9534F;" onclick="deleteComment('${sid}',${idx},${ci})">삭제</button>`:''}
+        </div>`).join('')}
+      </div>
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <input type="text" id="commentAuthor" placeholder="이름" style="width:80px; margin:0;">
+        <input type="text" id="commentText" placeholder="댓글을 남겨보세요" style="flex:1; margin:0;">
+        <button class="btn-sky" onclick="addComment('${sid}',${idx})">등록</button>
+      </div>
+      <div class="reaction-row" id="reactionRow"></div>
+    `;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'missionModalOverlay';
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeMission(); };
+  overlay.innerHTML = `
+    <div class="modal-box rel">
+      <button class="close-x" onclick="closeMission()">✕</button>
+      <h2 class="heading">미션 ${idx+1}. ${esc(missionText)}</h2>
+      ${contentHtml}
+      ${commentsHtml}
+      <hr class="divider">
+      ${renderPostForm(sid, idx, post, isOwnerOrAdmin)}
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  if(canSeeContent && post){ await renderReactions(sid, idx); }
+}
+
+function renderPostForm(sid, idx, post, isOwnerOrAdmin){
+  const editing = !!post;
+  const formTitle = editing ? '✏️ 수정하기' : '📸 미션 인증하기';
+  const typeVal = post ? post.type : 'photo';
+  const textVal = post && post.text ? post.text : '';
+  const visVal = post ? post.visibility : 'public';
+  return `
+    <div class="field-label" style="font-size:0.95rem; color:var(--ink);">${formTitle}</div>
+    <div class="radio-row">
+      <label><input type="radio" name="postType" value="photo" ${typeVal==='photo'?'checked':''} onchange="togglePostType(this)" onclick="togglePostType(this)"> 사진</label>
+      <label><input type="radio" name="postType" value="text" ${typeVal==='text'?'checked':''} onchange="togglePostType(this)" onclick="togglePostType(this)"> 소감문</label>
+    </div>
+    <div id="photoField" style="${typeVal==='photo'?'':'display:none;'}">
+      <div class="file-drop">
+        <input type="file" id="photoInput" accept="image/*">
+        <div class="small-note">사진을 선택하면 자동으로 알맞은 크기로 저장돼요.</div>
+      </div>
+    </div>
+    <div id="textField" style="${typeVal==='text'?'':'display:none;'}">
+      <textarea id="textInput" rows="3" placeholder="미션을 하면서 느낀 점을 적어보세요!">${esc(textVal)}</textarea>
+    </div>
+    <label class="field-label">공개 범위</label>
+    <div class="radio-row">
+      <label><input type="radio" name="visType" value="public" ${visVal==='public'?'checked':''}> 🌍 전체공개 (친구들도 볼 수 있어요)</label>
+      <label><input type="radio" name="visType" value="teacher" ${visVal==='teacher'?'checked':''}> 🔒 선생님공개 (선생님만 볼 수 있어요)</label>
+    </div>
+    <label class="field-label">비밀번호 ${editing?'(글쓴이 본인 확인용)':'(작성/수정/삭제에 필요해요, 잊지 마세요!)'}</label>
+    <input type="password" id="pwInput" placeholder="비밀번호">
+    <div id="pwConfirmWrap" style="${editing?'display:none;':''}">
+      <label class="field-label">비밀번호 확인</label>
+      <input type="password" id="pwConfirmInput" placeholder="비밀번호를 한번 더 입력해주세요">
+    </div>
+    <div class="flex-between" style="margin-top:10px;">
+      <button class="btn-primary" onclick="submitPost('${sid}',${idx})">${editing?'수정 저장':'저장하기'}</button>
+      ${editing?`<button class="btn-danger" onclick="deletePost('${sid}',${idx})">삭제하기</button>`:''}
+    </div>
+  `;
+}
+
+function togglePostType(radioEl){
+  const scope = (radioEl && radioEl.closest('.modal-box')) || document;
+  const checked = scope.querySelector('input[name=postType]:checked');
+  if(!checked) return;
+  const type = checked.value;
+  const photoField = scope.querySelector('#photoField');
+  const textField = scope.querySelector('#textField');
+  if(photoField) photoField.style.display = type==='photo' ? '' : 'none';
+  if(textField) textField.style.display = type==='text' ? '' : 'none';
+}
+
+function resizeImage(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const maxW = 700;
+        const scale = Math.min(1, maxW/img.width);
+        const w = Math.round(img.width*scale), h = Math.round(img.height*scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',0.72));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function submitPost(sid, idx){
+  const type = document.querySelector('input[name=postType]:checked').value;
+  const vis = document.querySelector('input[name=visType]:checked').value;
+  const pw = document.getElementById('pwInput').value;
+  const pwConfirmEl = document.getElementById('pwConfirmInput');
+
+  const data = await getStudentData(sid);
+  let usePw = pw;
+
+  if(!data.authHash){
+    if(!pw || pw.length<2){ await customAlert('비밀번호를 2자 이상 입력해주세요!'); return; }
+    const pwConfirm = pwConfirmEl ? pwConfirmEl.value : '';
+    if(pw !== pwConfirm){ await customAlert('비밀번호 확인이 일치하지 않아요!'); return; }
+    data.authHash = hashPw(pw, sid);
+    state.authedStudent[sid] = true; state.pwCache[sid] = pw;
+  } else {
+    if(!usePw) usePw = state.pwCache[sid];
+    if(!usePw || hashPw(usePw, sid) !== data.authHash){
+      if(!state.isAdmin){ await customAlert('비밀번호가 틀렸어요. 다시 확인해주세요!'); return; }
+    } else {
+      state.authedStudent[sid] = true; state.pwCache[sid] = usePw;
+    }
+  }
+
+  let text = '', image = null;
+  const existing = data.posts[idx];
+  if(type==='photo'){
+    const fileInput = document.getElementById('photoInput');
+    if(fileInput.files && fileInput.files[0]){
+      image = await resizeImage(fileInput.files[0]);
+    } else if(existing && existing.image){
+      image = existing.image;
+    } else {
+      await customAlert('사진을 선택해주세요!'); return;
+    }
+  } else {
+    text = document.getElementById('textInput').value.trim();
+    if(!text){ await customAlert('소감문을 입력해주세요!'); return; }
+  }
+
+  data.posts[idx] = {
+    type, text, image, visibility: vis,
+    ts: existing ? existing.ts : Date.now(),
+    editedTs: existing ? Date.now() : null
+  };
+  const ok = await saveStudentData(sid, data);
+  if(!ok) return;
+  closeMission();
+  openStudent(sid);
+}
+
+async function deletePost(sid, idx){
+  const data = await getStudentData(sid);
+  if(!state.isAdmin){
+    const pw = document.getElementById('pwInput').value || state.pwCache[sid];
+    if(!pw || hashPw(pw, sid) !== data.authHash){ await customAlert('삭제하려면 올바른 비밀번호가 필요해요!'); return; }
+  }
+  if(!await customConfirm('정말 이 게시글을 삭제할까요?')) return;
+  delete data.posts[idx];
+  delete data.comments[idx];
+  delete data.reactions[idx];
+  const ok = await saveStudentData(sid, data);
+  if(!ok) return;
+  closeMission();
+  openStudent(sid);
+}
+
+/* ===================== 댓글 ===================== */
+async function addComment(sid, idx){
+  const author = document.getElementById('commentAuthor').value.trim();
+  const text = document.getElementById('commentText').value.trim();
+  if(!author || !text){ await customAlert('이름과 댓글 내용을 모두 입력해주세요!'); return; }
+  const data = await getStudentData(sid);
+  data.comments[idx] = data.comments[idx] || [];
+  data.comments[idx].push({author, text, ts: Date.now()});
+  const ok = await saveStudentData(sid, data);
+  if(!ok) return;
+  await renderMissionModal(sid, idx);
+}
+async function deleteComment(sid, idx, ci){
+  if(!await customConfirm('이 댓글을 삭제할까요?')) return;
+  const data = await getStudentData(sid);
+  if(data.comments[idx]) data.comments[idx].splice(ci,1);
+  const ok = await saveStudentData(sid, data);
+  if(!ok) return;
+  await renderMissionModal(sid, idx);
+}
+
+/* ===================== 반응(이모지) ===================== */
+const REACTION_EMOJIS = ['👍','❤️','😆','👏','🎉'];
+async function renderReactions(sid, idx){
+  const row = document.getElementById('reactionRow');
+  if(!row) return;
+  const data = await getStudentData(sid);
+  const reactions = data.reactions[idx] || {};
+  let name = state.reactorName;
+  row.innerHTML = REACTION_EMOJIS.map(e=>{
+    const arr = reactions[e] || [];
+    const active = name && arr.includes(name);
+    return `<button class="reaction-btn ${active?'active':''}" onclick="toggleReaction('${sid}',${idx},'${e}')">${e} ${arr.length>0?arr.length:''}</button>`;
+  }).join('');
+}
+async function toggleReaction(sid, idx, emoji){
+  if(!state.reactorName){
+    const n = await customPrompt('반응을 남기려면 이름을 알려주세요!');
+    if(!n) return;
+    state.reactorName = n.trim();
+  }
+  const name = state.reactorName;
+  const data = await getStudentData(sid);
+  data.reactions[idx] = data.reactions[idx] || {};
+  if(!data.reactions[idx][emoji]) data.reactions[idx][emoji] = [];
+  const i = data.reactions[idx][emoji].indexOf(name);
+  if(i>=0) data.reactions[idx][emoji].splice(i,1); else data.reactions[idx][emoji].push(name);
+  const ok = await saveStudentData(sid, data);
+  if(!ok) return;
+  await renderReactions(sid, idx);
+}
+
+/* ===================== 교사(관리자) 패널 ===================== */
+let teacherTab = 'students';
+async function renderTeacher(){
+  if(!state.isAdmin){
+    const adminHash = await getVal('adminHash');
+    if(!adminHash){
+      return `
+        <div class="topbar"><button class="btn-ghost" onclick="goHome()">← 뒤로</button></div>
+        <div class="card" style="max-width:420px; margin:0 auto;">
+          <h2 class="heading">👩‍🏫 선생님 비밀번호 만들기</h2>
+          <p class="small-note">처음 사용하시는군요! 관리자 비밀번호를 설정해주세요.</p>
+          <label class="field-label">비밀번호</label>
+          <input type="password" id="adminPw1">
+          <label class="field-label">비밀번호 확인</label>
+          <input type="password" id="adminPw2">
+          <button class="btn-primary" onclick="createAdminPw()">설정하기</button>
+        </div>`;
+    }
+    return `
+      <div class="topbar"><button class="btn-ghost" onclick="goHome()">← 뒤로</button></div>
+      <div class="card" style="max-width:420px; margin:0 auto;">
+        <h2 class="heading">👩‍🏫 선생님 로그인</h2>
+        <label class="field-label">비밀번호</label>
+        <input type="password" id="adminPwLogin">
+        <button class="btn-primary" onclick="adminLogin()">로그인</button>
+      </div>`;
+  }
+
+  await refreshStudents(); await refreshMissions();
+  let body = '';
+  if(teacherTab==='students') body = await renderTabStudents();
+  else if(teacherTab==='missions') body = renderTabMissions();
+  else if(teacherTab==='posts') body = await renderTabPosts();
+  else if(teacherTab==='reset') body = renderTabReset();
+
+  return `
+    <div class="topbar">
+      <button class="btn-ghost" onclick="goHome()">← 홈으로</button>
+      <button class="btn-ghost" onclick="adminLogout()">🚪 로그아웃</button>
+    </div>
+    <div class="card">
+      <h2 class="heading" style="margin-top:0;">👩‍🏫 선생님 관리 패널</h2>
+      <div class="tabs">
+        <button class="tab-btn ${teacherTab==='students'?'active':''}" onclick="setTeacherTab('students')">학생 관리</button>
+        <button class="tab-btn ${teacherTab==='missions'?'active':''}" onclick="setTeacherTab('missions')">미션 관리</button>
+        <button class="tab-btn ${teacherTab==='posts'?'active':''}" onclick="setTeacherTab('posts')">게시글 관리</button>
+        <button class="tab-btn ${teacherTab==='reset'?'active':''}" onclick="setTeacherTab('reset')">초기화</button>
+      </div>
+      ${body}
+    </div>
+  `;
+}
+
+async function createAdminPw(){
+  const p1 = document.getElementById('adminPw1').value;
+  const p2 = document.getElementById('adminPw2').value;
+  if(!p1 || p1.length<3){ await customAlert('비밀번호를 3자 이상 입력해주세요.'); return; }
+  if(p1!==p2){ await customAlert('비밀번호가 일치하지 않아요.'); return; }
+  const ok = await setVal('adminHash', hashPw(p1,'admin'));
+  if(!ok) return;
+  state.isAdmin = true;
+  render();
+}
+async function adminLogin(){
+  const pw = document.getElementById('adminPwLogin').value;
+  const hash = await getVal('adminHash');
+  if(hashPw(pw,'admin')===hash){ state.isAdmin = true; render(); }
+  else await customAlert('비밀번호가 틀렸어요.');
+}
+function adminLogout(){ state.isAdmin = false; goHome(); }
+function setTeacherTab(t){ teacherTab = t; render(); }
+
+async function renderTabStudents(){
+  const students = state.studentsCache;
+  let rowsHtml = '';
+  for(const s of students){
+    const data = await getStudentData(s.id);
+    const count = Object.keys(data.posts).length;
+    rowsHtml += `<tr>
+      <td>${esc(s.name)}</td>
+      <td>${count} / 25</td>
+      <td>
+        <button class="btn-ghost" onclick="renameStudent('${s.id}')">이름수정</button>
+        <button class="btn-ghost" style="color:#D9534F;" onclick="removeStudent('${s.id}','${escAttr(s.name)}')">삭제</button>
+      </td>
+    </tr>`;
+  }
+  return `
+    <table class="admin-table">
+      <tr><th>이름</th><th>진행상황</th><th>관리</th></tr>
+      ${rowsHtml || '<tr><td colspan=3 style="color:#a39c88;">등록된 학생이 없어요.</td></tr>'}
+    </table>
+    <hr class="divider">
+    <div class="field-label">학생 추가</div>
+    <div style="display:flex; gap:8px;">
+      <input type="text" id="newStudentName" placeholder="학생 이름" style="margin:0;">
+      <button class="btn-leaf" onclick="addStudent()">추가</button>
+    </div>
+    <hr class="divider">
+    <div class="field-label">여러 명 한 번에 추가 (쉼표 또는 줄바꿈으로 구분)</div>
+    <textarea id="bulkStudentNames" rows="4" style="margin-bottom:8px;">${esc(STUDENTS_SEED.join(', '))}</textarea>
+    <button class="btn-leaf" onclick="bulkAddStudents()">일괄 추가</button>
+    <div class="small-note">이미 등록된 이름은 자동으로 건너뛰어요.</div>
+  `;
+}
+async function bulkAddStudents(){
+  const raw = document.getElementById('bulkStudentNames').value;
+  const names = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+  if(names.length===0){ await customAlert('추가할 이름을 입력해주세요.'); return; }
+  const students = await getStudentsSafe();
+  if(students===null) return;
+  const existingNames = new Set(students.map(s=>s.name));
+  let added = 0;
+  names.forEach((name, i)=>{
+    if(existingNames.has(name)) return;
+    students.push({id:'s'+Date.now()+Math.floor(Math.random()*10000)+'_'+i, name});
+    existingNames.add(name);
+    added++;
+  });
+  const ok = await setVal('students', students);
+  if(!ok) return;
+  await customAlert(`${added}명 추가되었어요! (중복 ${names.length-added}명은 건너뛰었어요)`);
+  render();
+}
+async function getStudentsSafe(){
+  const students = await getVal('students');
+  if(students===null){
+    await customAlert('학생 목록을 불러오지 못했어요. 새로고침한 뒤 다시 시도해주세요.');
+    return null;
+  }
+  return students;
+}
+async function addStudent(){
+  const name = document.getElementById('newStudentName').value.trim();
+  if(!name){ await customAlert('이름을 입력해주세요.'); return; }
+  const students = await getStudentsSafe();
+  if(students===null) return;
+  students.push({id:'s'+Date.now()+Math.floor(Math.random()*1000), name});
+  const ok = await setVal('students', students);
+  if(!ok) return;
+  render();
+}
+async function renameStudent(id){
+  const students = await getStudentsSafe();
+  if(students===null) return;
+  const s = students.find(x=>x.id===id);
+  if(!s) return;
+  const name = await customPrompt('새 이름을 입력하세요', s.name);
+  if(!name) return;
+  s.name = name.trim();
+  const ok = await setVal('students', students);
+  if(!ok) return;
+  render();
+}
+async function removeStudent(id, name){
+  if(!await customConfirm(`${name} 학생을 삭제할까요? 모든 게시글과 기록이 함께 삭제돼요.`)) return;
+  const students = await getStudentsSafe();
+  if(students===null) return;
+  const filtered = students.filter(s=>s.id!==id);
+  const ok = await setVal('students', filtered);
+  if(!ok) return;
+  await delVal(studentDataKey(id));
+  render();
+}
+
+function renderTabMissions(){
+  const missions = state.missionsCache;
+  const rows = missions.map((m,i)=>`
+    <div class="mission-edit-row">
+      <span>${i+1}.</span>
+      <input type="text" id="missionInput${i}" value="${escAttr(m)}" style="margin:0;">
+    </div>`).join('');
+  return `${rows}<button class="btn-primary" onclick="saveMissions()">미션 저장</button>`;
+}
+async function saveMissions(){
+  const missions = [];
+  for(let i=0;i<25;i++) missions.push(document.getElementById('missionInput'+i).value.trim() || ('미션 '+(i+1)));
+  const ok = await setVal('missions', missions);
+  if(!ok) return;
+  await customAlert('미션이 저장되었어요!');
+  render();
+}
+
+async function renderTabPosts(){
+  const students = state.studentsCache;
+  let sections = '';
+  for(const s of students){
+    const data = await getStudentData(s.id);
+    const idxs = Object.keys(data.posts).map(Number).sort((a,b)=>a-b);
+    if(idxs.length===0) continue;
+    let rows = '';
+    for(const idx of idxs){
+      const post = data.posts[idx];
+      rows += `<tr>
+        <td>${idx+1}. ${esc((state.missionsCache[idx]||'').slice(0,20))}</td>
+        <td>${post.type==='photo'?'📷사진':'📝글'}</td>
+        <td><span class="badge ${post.visibility==='public'?'badge-public':'badge-teacher'}">${post.visibility==='public'?'전체공개':'선생님공개'}</span></td>
+        <td><button class="btn-ghost" style="color:#D9534F;" onclick="adminDeletePost('${s.id}',${idx})">삭제</button></td>
+      </tr>`;
+    }
+    sections += `<h3 class="heading" style="margin-bottom:6px;">${esc(s.name)}</h3>
+      <table class="admin-table">${rows}</table><hr class="divider">`;
+  }
+  return sections || '<div class="empty-msg">아직 작성된 게시글이 없어요.</div>';
+}
+async function adminDeletePost(sid, idx){
+  if(!await customConfirm('이 게시글을 삭제할까요?')) return;
+  const data = await getStudentData(sid);
+  delete data.posts[idx];
+  delete data.comments[idx];
+  delete data.reactions[idx];
+  const ok = await saveStudentData(sid, data);
+  if(!ok) return;
+  render();
+}
+
+function renderTabReset(){
+  return `
+    <p>전체 데이터를 초기화하면 모든 학생, 게시글, 댓글, 반응이 사라져요. 미션 목록은 기본값으로 되돌아가요.</p>
+    <button class="btn-danger" onclick="resetAll()">⚠️ 전체 데이터 초기화</button>
+  `;
+}
+async function resetAll(){
+  if(!await customConfirm('정말 모든 데이터를 초기화할까요? 이 작업은 되돌릴 수 없어요.')) return;
+  if(!await customConfirm('한 번 더 확인할게요. 정말 초기화할까요?')) return;
+  const students = (await getVal('students')) || [];
+  for(const s of students){ await delVal(studentDataKey(s.id)); }
+  await setVal('students', []);
+  await setVal('missions', MISSIONS_DEFAULT);
+  state.isAdmin = false;
+  await customAlert('초기화되었어요. 선생님 비밀번호를 다시 설정해주세요.');
+  goHome();
+}
+
+/* ===================== 시작 ===================== */
+init();
+</script>
+</body>
+</html>
