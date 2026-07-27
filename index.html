@@ -145,6 +145,39 @@
   .badge-teacher{background:#F1EEE4; color:#7a7260;}
   .save-indicator{position:fixed; bottom:14px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:8px 18px; border-radius:20px; font-size:0.85rem; z-index:100; opacity:0.9;}
   ::placeholder{color:#c9c2ae;}
+  /* ---- 추가 기능: 응원 게시판 / 성장 단계 ---- */
+  .cheer-board{
+    background:linear-gradient(135deg, #FFE29A, #FFF6DC);
+    border-radius:20px; padding:16px 20px; box-shadow:var(--shadow); margin-bottom:18px;
+    border:2px solid #F5DFA0;
+  }
+  .cheer-board .cheer-title{font-family:'Jua'; font-size:0.95rem; color:#8a7233; margin-bottom:8px;}
+  .cheer-board .cheer-text{font-family:'Jua'; font-size:1.15rem; line-height:1.55; color:var(--ink); word-break:break-word;}
+  .cheer-board .cheer-from{font-size:0.85rem; color:#8a7233; text-align:right; margin-top:6px;}
+  .cheer-actions{display:flex; gap:8px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap;}
+  .cheer-item{background:#fff; border-radius:12px; padding:9px 12px; margin-bottom:8px; font-size:0.9rem; word-break:break-word;}
+  .cheer-item b{color:var(--sky-dark);}
+  .cheer-list-wrap{max-height:50vh; overflow-y:auto;}
+  .student-card .bingo-count{font-size:0.85rem; font-weight:700; color:var(--coral); margin-bottom:1px;}
+  .student-card .stage{font-size:0.75rem; color:#8b8474;}
+  .stage-legend{display:flex; flex-wrap:wrap; gap:8px; font-size:0.75rem; color:#8b8474; margin-top:14px; justify-content:center;}
+  .rules-box{
+    background:#FFFDF5; border:2px dashed #E9D9A8; border-radius:20px;
+    padding:18px 22px; margin:22px 0 30px; box-shadow:var(--shadow);
+  }
+  .rules-box h3{font-family:'Jua'; font-size:1.05rem; margin:0 0 10px; color:var(--ink);}
+  .rules-box ol{margin:0; padding-left:22px;}
+  .rules-box li{margin-bottom:8px; line-height:1.55; font-size:0.93rem;}
+  .rules-box li .sub{display:block; font-size:0.82rem; color:#8b8474; margin-top:2px;}
+  .rules-box .notice{
+    margin-top:14px; padding:12px 14px; background:#FFF0EE; border-radius:14px;
+    border:1px solid #FFD5CE; font-size:0.82rem; line-height:1.6; color:#9A4A3C;
+  }
+  .rules-box .rules-lead{font-size:0.87rem; color:#8b8474; margin:0 0 12px; line-height:1.55;}
+  .rules-box .notice ul{margin:8px 0 0; padding-left:18px;}
+  .rules-box .notice li{margin-bottom:6px; font-size:0.82rem;}
+  .rules-mini{font-size:0.78rem; color:#9A4A3C; background:#FFF0EE; border-radius:12px;
+    padding:8px 12px; margin:10px 0 4px; line-height:1.5;}
 </style>
 </head>
 <body>
@@ -469,12 +502,12 @@ async function init(){
       await customAlert('미션 목록을 불러오지 못했어요. 새로고침한 뒤 다시 시도해주세요. (기존 데이터는 안전해요)');
     }
   }
-  state.studentsCache = students;
+  state.studentsCache = await ensureStudentNumbers(students);
   state.missionsCache = missions;
   render();
 }
 
-async function refreshStudents(){ state.studentsCache = (await getVal('students')) || []; }
+async function refreshStudents(){ state.studentsCache = await ensureStudentNumbers((await getVal('students')) || []); }
 async function refreshMissions(){ state.missionsCache = (await getVal('missions')) || MISSIONS_DEFAULT; }
 
 /* ===================== 렌더 디스패치 ===================== */
@@ -486,17 +519,204 @@ async function render(){
   window.scrollTo(0,0);
 }
 
+/* ===================== 성장 단계 (빙고 줄 수에 따라) ===================== */
+const GROWTH_STAGES = [
+  { min:0, emoji:'🌰', label:'씨앗' },
+  { min:1, emoji:'🌱', label:'새싹' },
+  { min:2, emoji:'🌿', label:'떡잎' },
+  { min:3, emoji:'🍃', label:'덩굴' },
+  { min:4, emoji:'🌼', label:'꽃' },
+  { min:5, emoji:'🍈', label:'열매' }
+];
+const FULL_STAGE = { emoji:'🍉', label:'올빙고 수박!' };
+function getGrowth(lines, doneCount){
+  if(doneCount >= 25) return FULL_STAGE;
+  let st = GROWTH_STAGES[0];
+  for(const s of GROWTH_STAGES){ if(lines >= s.min) st = s; }
+  return st;
+}
+function stageLegendHtml(){
+  const items = GROWTH_STAGES.map(s=> `<span>${s.emoji} ${s.min}빙고 ${s.label}</span>`).join('');
+  return `<div class="stage-legend">${items}<span>${FULL_STAGE.emoji} 25칸 완성 수박</span></div>`;
+}
+
+/* ===================== 응원 메시지 게시판 ===================== */
+const CHEER_KEY = 'cheers';
+async function getCheers(){
+  const c = await getVal(CHEER_KEY);
+  return Array.isArray(c) ? c : [];
+}
+async function renderCheerBoard(){
+  const cheers = await getCheers();
+  let inner;
+  if(cheers.length === 0){
+    inner = `<div class="cheer-text">아직 응원 메시지가 없어요. 첫 번째 응원을 남겨볼까요? 💌</div>`;
+  } else {
+    const pick = cheers[Math.floor(Math.random()*cheers.length)];
+    inner = `<div class="cheer-text">“${esc(pick.text)}”</div>
+             <div class="cheer-from">— ${esc(pick.name)} 올림</div>`;
+  }
+  return `
+    <div class="cheer-board">
+      <div class="cheer-title">📣 오늘의 응원 한마디 <span style="font-weight:400;">(새로고침하면 다른 친구의 응원이 나와요)</span></div>
+      ${inner}
+      <div class="cheer-actions">
+        <button class="btn-ghost" onclick="openCheerList()">📜 전체 보기 (${cheers.length})</button>
+        <button class="btn-sun" onclick="openCheerWrite()">✍️ 응원 남기기</button>
+      </div>
+    </div>`;
+}
+function closeCheerModal(){ const el = document.getElementById('cheerModalOverlay'); if(el) el.remove(); }
+function openCheerWrite(){
+  closeCheerModal();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay'; overlay.id = 'cheerModalOverlay';
+  overlay.innerHTML = `
+    <div class="modal-box rel" style="max-width:420px;">
+      <button class="close-x" onclick="closeCheerModal()">✕</button>
+      <h2 class="heading">💌 친구들에게 응원 한마디</h2>
+      <p class="small-note">여기에 남긴 메시지는 모든 친구에게 보여요.</p>
+      <label class="field-label">번호</label>
+      <input type="text" id="cheerName" maxlength="10" value="${escAttr(state.reactorName||'')}" placeholder="번호 (예: 7번)">
+      <label class="field-label">응원 메시지</label>
+      <textarea id="cheerText" rows="3" maxlength="60" placeholder="예) 다들 이번 여름방학 화이팅! 🍉 (60자까지)"></textarea>
+      <div class="flex-between" style="margin-top:10px;">
+        <button class="btn-ghost" onclick="closeCheerModal()">취소</button>
+        <button class="btn-primary" onclick="submitCheer()">남기기</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeCheerModal(); };
+  setTimeout(()=>{ const el=document.getElementById('cheerName'); if(el) el.focus(); }, 30);
+}
+async function submitCheer(){
+  const nameEl = document.getElementById('cheerName');
+  const textEl = document.getElementById('cheerText');
+  if(!nameEl || !textEl) return;
+  const name = nameEl.value.trim();
+  const text = textEl.value.trim();
+  if(!name){ await customAlert('번호를 입력해주세요! (예: 7번)'); return; }
+  if(!text){ await customAlert('응원 메시지를 입력해주세요!'); return; }
+  const cheers = await getCheers();
+  cheers.push({ name: name.slice(0,10), text: text.slice(0,60), ts: Date.now() });
+  while(cheers.length > 200) cheers.shift();
+  const ok = await setVal(CHEER_KEY, cheers);
+  if(!ok) return;
+  if(!state.reactorName) state.reactorName = name.slice(0,10);
+  closeCheerModal();
+  await customAlert('응원 메시지를 남겼어요! 친구들이 새로고침하면 보게 될 거예요 😊');
+  render();
+}
+async function openCheerList(){
+  const cheers = await getCheers();
+  closeCheerModal();
+  const items = cheers.length === 0
+    ? '<div class="empty-msg">아직 응원 메시지가 없어요.</div>'
+    : cheers.map((c,i)=>({c,i})).reverse().map(({c,i})=>`
+        <div class="cheer-item">
+          <b>${esc(c.name)}</b> · ${esc(c.text)}
+          ${state.isAdmin?`<button class="btn-ghost" style="float:right; color:#D9534F;" onclick="deleteCheer(${i})">삭제</button>`:''}
+        </div>`).join('');
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay'; overlay.id = 'cheerModalOverlay';
+  overlay.innerHTML = `
+    <div class="modal-box rel">
+      <button class="close-x" onclick="closeCheerModal()">✕</button>
+      <h2 class="heading">📜 우리 반 응원 메시지 (${cheers.length})</h2>
+      <div class="cheer-list-wrap">${items}</div>
+      <div class="flex-between" style="margin-top:12px;">
+        <button class="btn-ghost" onclick="closeCheerModal()">닫기</button>
+        <button class="btn-sun" onclick="openCheerWrite()">✍️ 나도 남기기</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeCheerModal(); };
+}
+async function deleteCheer(i){
+  if(!await customConfirm('이 응원 메시지를 삭제할까요?')) return;
+  const cheers = await getCheers();
+  if(i < 0 || i >= cheers.length){ await openCheerList(); return; }
+  cheers.splice(i, 1);
+  const ok = await setVal(CHEER_KEY, cheers);
+  if(!ok) return;
+  await openCheerList();
+}
+
+/* ===================== 학생 번호 (이름 대신 노출) ===================== */
+/* 개인정보 보호를 위해 공개 화면에는 이름 대신 번호만 표시한다.
+   번호(no)는 학생별로 고정 저장되어, 다른 학생이 삭제돼도 바뀌지 않는다. */
+function studentNo(s, idx){
+  return (s && typeof s.no === 'number' && s.no > 0) ? s.no : (idx + 1);
+}
+/* 공개 화면용: 번호만. 선생님 모드에서는 확인을 위해 이름을 함께 보여준다. */
+function studentLabel(s, idx){
+  const no = studentNo(s, idx);
+  return state.isAdmin ? `${no}번 (${s.name})` : `${no}번`;
+}
+function nextStudentNo(students){
+  let max = 0;
+  for(const s of students){ if(typeof s.no === 'number' && s.no > max) max = s.no; }
+  return max + 1;
+}
+/* 기존에 번호 없이 저장된 학생들에게 순서대로 번호를 부여 (최초 1회) */
+async function ensureStudentNumbers(students){
+  if(!Array.isArray(students) || students.length === 0) return students;
+  if(students.every(s => typeof s.no === 'number' && s.no > 0)) return students;
+  let next = nextStudentNo(students);
+  students.forEach((s, i) => {
+    if(typeof s.no !== 'number' || s.no <= 0) s.no = (next <= i+1) ? (i+1) : next++;
+  });
+  const used = new Set();
+  students.forEach((s, i) => {
+    while(used.has(s.no)) s.no++;
+    used.add(s.no);
+  });
+  await setVal('students', students);
+  return students;
+}
+
+/* ===================== 이용 약속 (홈 화면 맨 아래) ===================== */
+function renderRules(){
+  return `
+    <div class="rules-box">
+      <h3>📢 여름방학 미션빙고 이용 약속!</h3>
+      <p class="rules-lead">여름방학 동안 우리 반 웹사이트를 멋지게 이용하기 위해 반드시 지켜야 할 3가지 약속이에요.</p>
+      <ol>
+        <li>개인정보를 지켜요!
+          <span class="sub">(얼굴이 나오는 사진, 전화번호·주소 등 개인정보 업로드 금지)</span></li>
+        <li>예쁜 말로 서로 격려하고 응원해요!
+          <span class="sub">(욕설, 비난, 상처 주는 말 금지)</span></li>
+        <li>내가 직접 한 활동만 올려요!
+          <span class="sub">(인터넷 사진 무단 도용 금지, 직접 촬영하고 작성한 내용만 사용)</span></li>
+      </ol>
+      <div class="notice">
+        <b>⚠️ 책임 및 운영 안내 (필독)</b>
+        <ul>
+          <li>약속을 위반하여 발생하는 모든 책임은 전적으로 본인(학생 및 보호자)에게 있습니다.</li>
+          <li>약속을 위반한 게시물은 교사가 사전 안내 없이 즉시 삭제합니다.</li>
+          <li>게시글을 올리기 전, 위의 약속을 모두 지켰는지 반드시 마지막으로 확인하세요!</li>
+        </ul>
+      </div>
+    </div>`;
+}
+
 /* ===================== 홈 화면 ===================== */
 async function renderHome(){
   await refreshStudents();
   const students = state.studentsCache;
+  const cheerBoard = await renderCheerBoard();
   let cards = '';
-  for(const s of students){
+  for(let si=0; si<students.length; si++){
+    const s = students[si];
     const data = await getStudentData(s.id);
-    const count = Object.keys(data.posts).length;
+    const doneIdx = new Set(Object.keys(data.posts).map(Number));
+    const count = doneIdx.size;
+    const lines = countBingoLines(doneIdx);
+    const g = getGrowth(lines, count);
     const pct = Math.round((count/25)*100);
     const circ = 2*Math.PI*24;
     const dash = circ*(pct/100);
+    const bingoLabel = count>=25 ? '🎉 올빙고 달성!' : (lines>0 ? `🎯 ${lines}빙고 달성` : '아직 0빙고');
     cards += `
       <div class="student-card" onclick="openStudent('${s.id}')">
         <div class="progress-ring">
@@ -507,8 +727,10 @@ async function renderHome(){
           </svg>
           <div class="pct">${count}/25</div>
         </div>
-        <div class="avatar">🍉</div>
-        <div class="name">${esc(s.name)}</div>
+        <div class="avatar">${g.emoji}</div>
+        <div class="name">${esc(studentLabel(s, si))}</div>
+        <div class="bingo-count">${bingoLabel}</div>
+        <div class="stage">${g.emoji} ${esc(g.label)}</div>
       </div>`;
   }
   return `
@@ -516,11 +738,13 @@ async function renderHome(){
       <div class="title"><span class="sun-icon">🌻</span><h1>여름방학 미션 빙고</h1></div>
       <button class="btn-sky" onclick="openTeacher()">👩‍🏫 선생님 모드</button>
     </div>
+    ${cheerBoard}
     <div class="card">
       <h2 class="heading" style="margin-top:0;">누구의 빙고판을 볼까요?</h2>
       ${students.length===0 ? `<div class="empty-msg">아직 등록된 학생이 없어요.<br>선생님 모드에서 학생을 추가해주세요! 🧑‍🏫</div>`
-        : `<div class="student-grid">${cards}</div>`}
+        : `<div class="student-grid">${cards}</div>${stageLegendHtml()}`}
     </div>
+    ${renderRules()}
   `;
 }
 
@@ -558,7 +782,8 @@ function countBingoLines(doneSet){
 
 async function renderStudentPage(sid){
   await refreshStudents(); await refreshMissions();
-  const student = state.studentsCache.find(s=>s.id===sid);
+  const sIdx = state.studentsCache.findIndex(s=>s.id===sid);
+  const student = sIdx>=0 ? state.studentsCache[sIdx] : null;
   if(!student){ state.view='home'; return renderHome(); }
   const missions = state.missionsCache;
   const data = await getStudentData(sid);
@@ -588,7 +813,7 @@ async function renderStudentPage(sid){
     <div class="card">
       <div class="bingo-header">
         <div>
-          <h2 class="heading" style="margin:0;">🍉 ${esc(student.name)}의 여름방학 빙고</h2>
+          <h2 class="heading" style="margin:0;">🍉 ${esc(studentLabel(student, sIdx))}의 여름방학 빙고</h2>
           <div class="meta-row">완료 ${count} / 25 · 빙고 ${lines}줄 완성${isMe?' · <span style="color:var(--leaf);font-weight:700;">🔓 내 페이지로 확인됨</span>':''}</div>
         </div>
         ${!isMe? `<button class="btn-sun" onclick="promptAuth('${sid}')">🔑 내 페이지 인증하기</button>`:''}
@@ -646,7 +871,7 @@ async function renderMissionModal(sid, idx){
     contentHtml = `<div class="locked-notice">🔒 이 게시글은 선생님과 작성자만 볼 수 있어요.</div>`;
   } else {
     contentHtml = `<div class="post-content">
-      ${post.type==='photo' && post.image ? `<img src="${post.image}" alt="인증 사진">` : ''}
+      ${post.image ? `<img src="${post.image}" alt="인증 사진">` : ''}
       ${post.text ? `<div class="text-post">${esc(post.text)}</div>` : ''}
       <div class="meta-row">
         <span class="badge ${post.visibility==='public'?'badge-public':'badge-teacher'}">${post.visibility==='public'?'전체공개':'선생님공개'}</span>
@@ -667,7 +892,7 @@ async function renderMissionModal(sid, idx){
         </div>`).join('')}
       </div>
       <div style="display:flex; gap:6px; margin-top:8px;">
-        <input type="text" id="commentAuthor" placeholder="이름" style="width:80px; margin:0;">
+        <input type="text" id="commentAuthor" placeholder="번호" style="width:80px; margin:0;">
         <input type="text" id="commentText" placeholder="댓글을 남겨보세요" style="flex:1; margin:0;">
         <button class="btn-sky" onclick="addComment('${sid}',${idx})">등록</button>
       </div>
@@ -696,24 +921,22 @@ async function renderMissionModal(sid, idx){
 function renderPostForm(sid, idx, post, isOwnerOrAdmin){
   const editing = !!post;
   const formTitle = editing ? '✏️ 수정하기' : '📸 미션 인증하기';
-  const typeVal = post ? post.type : 'photo';
   const textVal = post && post.text ? post.text : '';
   const visVal = post ? post.visibility : 'public';
+  const hasImage = !!(post && post.image);
   return `
     <div class="field-label" style="font-size:0.95rem; color:var(--ink);">${formTitle}</div>
-    <div class="radio-row">
-      <label><input type="radio" name="postType" value="photo" ${typeVal==='photo'?'checked':''} onchange="togglePostType(this)" onclick="togglePostType(this)"> 사진</label>
-      <label><input type="radio" name="postType" value="text" ${typeVal==='text'?'checked':''} onchange="togglePostType(this)" onclick="togglePostType(this)"> 소감문</label>
+    <div class="small-note">사진과 소감문을 <b>함께</b> 올릴 수 있어요. 둘 중 하나만 올려도 괜찮아요!</div>
+    <label class="field-label">📷 인증 사진 ${hasImage?'(이미 올린 사진이 있어요)':'(선택)'}</label>
+    <div class="file-drop">
+      <input type="file" id="photoInput" accept="image/*">
+      <div class="small-note">사진을 선택하면 자동으로 알맞은 크기로 저장돼요.${hasImage?' 새로 고르면 기존 사진이 교체돼요.':''}</div>
     </div>
-    <div id="photoField" style="${typeVal==='photo'?'':'display:none;'}">
-      <div class="file-drop">
-        <input type="file" id="photoInput" accept="image/*">
-        <div class="small-note">사진을 선택하면 자동으로 알맞은 크기로 저장돼요.</div>
-      </div>
-    </div>
-    <div id="textField" style="${typeVal==='text'?'':'display:none;'}">
-      <textarea id="textInput" rows="3" placeholder="미션을 하면서 느낀 점을 적어보세요!">${esc(textVal)}</textarea>
-    </div>
+    ${hasImage?`<label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; margin:6px 0 4px;">
+      <input type="checkbox" id="removePhoto" style="width:auto; margin:0;"> 기존 사진 지우기 (소감문만 남기기)
+    </label>`:''}
+    <label class="field-label">✍️ 소감문 (선택)</label>
+    <textarea id="textInput" rows="3" placeholder="미션을 하면서 느낀 점을 적어보세요!">${esc(textVal)}</textarea>
     <label class="field-label">공개 범위</label>
     <div class="radio-row">
       <label><input type="radio" name="visType" value="public" ${visVal==='public'?'checked':''}> 🌍 전체공개 (친구들도 볼 수 있어요)</label>
@@ -725,22 +948,12 @@ function renderPostForm(sid, idx, post, isOwnerOrAdmin){
       <label class="field-label">비밀번호 확인</label>
       <input type="password" id="pwConfirmInput" placeholder="비밀번호를 한번 더 입력해주세요">
     </div>
+    <div class="rules-mini">✅ 올리기 전 확인! 얼굴 사진·개인정보 올리지 않기 / 내가 직접 한 활동만 올리기 / 예쁜 말 쓰기</div>
     <div class="flex-between" style="margin-top:10px;">
       <button class="btn-primary" onclick="submitPost('${sid}',${idx})">${editing?'수정 저장':'저장하기'}</button>
       ${editing?`<button class="btn-danger" onclick="deletePost('${sid}',${idx})">삭제하기</button>`:''}
     </div>
   `;
-}
-
-function togglePostType(radioEl){
-  const scope = (radioEl && radioEl.closest('.modal-box')) || document;
-  const checked = scope.querySelector('input[name=postType]:checked');
-  if(!checked) return;
-  const type = checked.value;
-  const photoField = scope.querySelector('#photoField');
-  const textField = scope.querySelector('#textField');
-  if(photoField) photoField.style.display = type==='photo' ? '' : 'none';
-  if(textField) textField.style.display = type==='text' ? '' : 'none';
 }
 
 function resizeImage(file){
@@ -767,8 +980,8 @@ function resizeImage(file){
 }
 
 async function submitPost(sid, idx){
-  const type = document.querySelector('input[name=postType]:checked').value;
-  const vis = document.querySelector('input[name=visType]:checked').value;
+  const visEl = document.querySelector('input[name=visType]:checked');
+  const vis = visEl ? visEl.value : 'public';
   const pw = document.getElementById('pwInput').value;
   const pwConfirmEl = document.getElementById('pwConfirmInput');
 
@@ -790,21 +1003,22 @@ async function submitPost(sid, idx){
     }
   }
 
-  let text = '', image = null;
   const existing = data.posts[idx];
-  if(type==='photo'){
-    const fileInput = document.getElementById('photoInput');
-    if(fileInput.files && fileInput.files[0]){
-      image = await resizeImage(fileInput.files[0]);
-    } else if(existing && existing.image){
-      image = existing.image;
-    } else {
-      await customAlert('사진을 선택해주세요!'); return;
-    }
-  } else {
-    text = document.getElementById('textInput').value.trim();
-    if(!text){ await customAlert('소감문을 입력해주세요!'); return; }
+  const textEl = document.getElementById('textInput');
+  const text = textEl ? textEl.value.trim() : '';
+  const fileInput = document.getElementById('photoInput');
+  const removeEl = document.getElementById('removePhoto');
+  let image = null;
+  if(fileInput && fileInput.files && fileInput.files[0]){
+    image = await resizeImage(fileInput.files[0]);
+  } else if(existing && existing.image && !(removeEl && removeEl.checked)){
+    image = existing.image;
   }
+  if(!image && !text){
+    await customAlert('사진이나 소감문 중 하나는 꼭 올려주세요! (둘 다 올려도 좋아요)');
+    return;
+  }
+  const type = image ? 'photo' : 'text';
 
   data.posts[idx] = {
     type, text, image, visibility: vis,
@@ -837,7 +1051,7 @@ async function deletePost(sid, idx){
 async function addComment(sid, idx){
   const author = document.getElementById('commentAuthor').value.trim();
   const text = document.getElementById('commentText').value.trim();
-  if(!author || !text){ await customAlert('이름과 댓글 내용을 모두 입력해주세요!'); return; }
+  if(!author || !text){ await customAlert('번호와 댓글 내용을 모두 입력해주세요! (예: 7번)'); return; }
   const data = await getStudentData(sid);
   data.comments[idx] = data.comments[idx] || [];
   data.comments[idx].push({author, text, ts: Date.now()});
@@ -870,7 +1084,7 @@ async function renderReactions(sid, idx){
 }
 async function toggleReaction(sid, idx, emoji){
   if(!state.reactorName){
-    const n = await customPrompt('반응을 남기려면 이름을 알려주세요!');
+    const n = await customPrompt('반응을 남기려면 번호를 알려주세요! (예: 7번)');
     if(!n) return;
     state.reactorName = n.trim();
   }
@@ -964,6 +1178,7 @@ async function renderTabStudents(){
     const data = await getStudentData(s.id);
     const count = Object.keys(data.posts).length;
     rowsHtml += `<tr>
+      <td style="font-weight:700; color:var(--sky-dark);">${studentNo(s, students.indexOf(s))}번</td>
       <td>${esc(s.name)}</td>
       <td>${count} / 25</td>
       <td>
@@ -974,8 +1189,8 @@ async function renderTabStudents(){
   }
   return `
     <table class="admin-table">
-      <tr><th>이름</th><th>진행상황</th><th>관리</th></tr>
-      ${rowsHtml || '<tr><td colspan=3 style="color:#a39c88;">등록된 학생이 없어요.</td></tr>'}
+      <tr><th>번호</th><th>이름(선생님만 보임)</th><th>진행상황</th><th>관리</th></tr>
+      ${rowsHtml || '<tr><td colspan=4 style="color:#a39c88;">등록된 학생이 없어요.</td></tr>'}
     </table>
     <hr class="divider">
     <div class="field-label">학생 추가</div>
@@ -987,7 +1202,11 @@ async function renderTabStudents(){
     <div class="field-label">여러 명 한 번에 추가 (쉼표 또는 줄바꿈으로 구분)</div>
     <textarea id="bulkStudentNames" rows="4" style="margin-bottom:8px;">${esc(STUDENTS_SEED.join(', '))}</textarea>
     <button class="btn-leaf" onclick="bulkAddStudents()">일괄 추가</button>
-    <div class="small-note">이미 등록된 이름은 자동으로 건너뛰어요.</div>
+    <div class="small-note">이미 등록된 이름은 자동으로 건너뛰어요. 학생 이름은 <b>선생님 화면에서만</b> 보이고, 학생·학부모 화면에는 번호만 표시돼요.</div>
+    <hr class="divider">
+    <div class="field-label">번호 정리</div>
+    <button class="btn-ghost" onclick="renumberStudents()">🔢 번호 1번부터 다시 매기기</button>
+    <div class="small-note">학생을 삭제해서 번호가 비었을 때 사용하세요. 현재 목록 순서대로 1번부터 다시 부여해요.</div>
   `;
 }
 async function bulkAddStudents(){
@@ -998,15 +1217,26 @@ async function bulkAddStudents(){
   if(students===null) return;
   const existingNames = new Set(students.map(s=>s.name));
   let added = 0;
+  let nextNo = nextStudentNo(students);
   names.forEach((name, i)=>{
     if(existingNames.has(name)) return;
-    students.push({id:'s'+Date.now()+Math.floor(Math.random()*10000)+'_'+i, name});
+    students.push({id:'s'+Date.now()+Math.floor(Math.random()*10000)+'_'+i, name, no: nextNo++});
     existingNames.add(name);
     added++;
   });
   const ok = await setVal('students', students);
   if(!ok) return;
   await customAlert(`${added}명 추가되었어요! (중복 ${names.length-added}명은 건너뛰었어요)`);
+  render();
+}
+async function renumberStudents(){
+  if(!await customConfirm('현재 목록 순서대로 1번부터 번호를 다시 매길까요?\n이미 올라온 게시글은 그대로 유지돼요.')) return;
+  const students = await getStudentsSafe();
+  if(students===null) return;
+  students.forEach((s,i)=>{ s.no = i+1; });
+  const ok = await setVal('students', students);
+  if(!ok) return;
+  await customAlert('번호를 1번부터 다시 매겼어요.');
   render();
 }
 async function getStudentsSafe(){
@@ -1022,7 +1252,7 @@ async function addStudent(){
   if(!name){ await customAlert('이름을 입력해주세요.'); return; }
   const students = await getStudentsSafe();
   if(students===null) return;
-  students.push({id:'s'+Date.now()+Math.floor(Math.random()*1000), name});
+  students.push({id:'s'+Date.now()+Math.floor(Math.random()*1000), name, no: nextStudentNo(students)});
   const ok = await setVal('students', students);
   if(!ok) return;
   render();
@@ -1080,12 +1310,12 @@ async function renderTabPosts(){
       const post = data.posts[idx];
       rows += `<tr>
         <td>${idx+1}. ${esc((state.missionsCache[idx]||'').slice(0,20))}</td>
-        <td>${post.type==='photo'?'📷사진':'📝글'}</td>
+        <td>${post.image?'📷':''}${post.text?'📝':''}${(!post.image&&!post.text)?'-':''}</td>
         <td><span class="badge ${post.visibility==='public'?'badge-public':'badge-teacher'}">${post.visibility==='public'?'전체공개':'선생님공개'}</span></td>
         <td><button class="btn-ghost" style="color:#D9534F;" onclick="adminDeletePost('${s.id}',${idx})">삭제</button></td>
       </tr>`;
     }
-    sections += `<h3 class="heading" style="margin-bottom:6px;">${esc(s.name)}</h3>
+    sections += `<h3 class="heading" style="margin-bottom:6px;">${studentNo(s, students.indexOf(s))}번 ${esc(s.name)}</h3>
       <table class="admin-table">${rows}</table><hr class="divider">`;
   }
   return sections || '<div class="empty-msg">아직 작성된 게시글이 없어요.</div>';
@@ -1103,7 +1333,7 @@ async function adminDeletePost(sid, idx){
 
 function renderTabReset(){
   return `
-    <p>전체 데이터를 초기화하면 모든 학생, 게시글, 댓글, 반응이 사라져요. 미션 목록은 기본값으로 되돌아가요.</p>
+    <p>전체 데이터를 초기화하면 모든 학생, 게시글, 댓글, 반응, 응원 메시지가 사라져요. 미션 목록은 기본값으로 되돌아가요.</p>
     <button class="btn-danger" onclick="resetAll()">⚠️ 전체 데이터 초기화</button>
   `;
 }
@@ -1114,6 +1344,7 @@ async function resetAll(){
   for(const s of students){ await delVal(studentDataKey(s.id)); }
   await setVal('students', []);
   await setVal('missions', MISSIONS_DEFAULT);
+  await setVal(CHEER_KEY, []);
   state.isAdmin = false;
   await customAlert('초기화되었어요. 선생님 비밀번호를 다시 설정해주세요.');
   goHome();
